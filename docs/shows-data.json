@@ -4,6 +4,31 @@
     "location": "Chicago, IL - ",
     "bands": ["Whole Team Dies", "Hoodwink", "Naomi 10 Million", "Deerest Friends"]
   },
+   {
+    "date": "2025-05-30",
+    "location": "Chicago, IL - Atlantic",
+    "bands": ["Whole Team Dies", "Receiver", "Memory Card", "Copies"]
+  },
+   {
+    "date": "2025-8-23",
+    "location": "Chicago, IL - Fallen Log (SDS Benefit Show)",
+    "bands": ["Whole Team Dies", "Deerest Friends", "Oyeme", "Mizzy", "Sulkworm", "Tear Garden Collective"]
+  },
+   {
+    "date": "2025-10-11",
+    "location": "Bloomington Normal, IL - Lakehouse (Palastine Benefit Show",
+    "bands": ["Whole Team Dies", "Laikaa", "Gadfly", "Tapeworm", "A Doll For Abigail", "Blind Baby", "Unthynck"]
+  },
+   {
+    "date": "2025-10-12",
+    "location": "Chicago, IL - Empty Bliss",
+    "bands": ["Whole Team Dies", "Welcome to Berlin", "Lifeguard", "mail."]
+  },
+   {
+    "date": "2025-11-05",
+    "location": "Chicago, IL - Fallen Log",
+    "bands": ["Whole Team Dies", "Poolish", "Soaps"]
+  },
   {
     "date": "2026-02-22",
     "location": "Chicago, IL - Lowdown (Trash Tape Fest)",
@@ -15,7 +40,7 @@
     "bands": ["Whole Team Dies", "A Doll For Abigail", "Mizzy", "Pleasure Dome"]
   },
   {
-    "date": "2026-05-10",
+    "date": "2026-05-8",
     "location": "Chicago, IL - Lowdown",
     "bands": ["Whole Team Dies", "Hither", "Cambodian Sim Card"]
   },
