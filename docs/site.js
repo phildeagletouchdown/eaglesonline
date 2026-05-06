@@ -12,9 +12,7 @@ const links = nodes.flatMap((node, index) =>
   nodes.slice(index + 1).map((target) => [node.dataset.node, target.dataset.node])
 );
 const fallbackBackdrop = `
-pretext is a small text rendering engine for pages that refuse to sit still.
-the document is not a flat block. the document is a field. page links become
-hard floating islands. paragraphs find their route through the remaining space.
+THE ONLY WAY OUT IS THROUGH
 `.trim();
 let backdropWords = fallbackBackdrop.split(/\s+/);
 let animationStarted = false;
