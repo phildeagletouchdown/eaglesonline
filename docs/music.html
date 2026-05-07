@@ -12,15 +12,92 @@
     </style>
   </head>
   <body>
-    <main class="page-shell">
+    <main
+      class="stage music-stage"
+      aria-label="Streaming links"
+      data-backdrop="backdrop.mp4"
+      data-backdrop-mobile="backdrop.mp4"
+      data-backdrop-fallback="backdrop.png"
+      data-backdrop-mobile-fallback="backdropmobile.png"
+    >
+      <pre class="ascii-layer" aria-hidden="true"></pre>
       <a class="back-link" href="index.html">index</a>
-      <h1>music</h1>
-      <pre class="page-art">
-  ____________________________
- |                            |
- |       ascii music here     |
- |____________________________|
-      </pre>
+
+      <nav class="node-field" aria-label="Streaming links">
+        <a
+          class="node root"
+          href="https://limewire.com/"
+          data-node="limewire"
+          data-label="limewire"
+          aria-label="limewire"
+          target="_blank"
+          rel="noreferrer"
+          style="--x: 58; --y: 28;"
+        >
+          <pre aria-hidden="true"></pre>
+          <span class="node-label" aria-hidden="true">limewire</span>
+        </a>
+
+        <a
+          class="node"
+          href="https://archive.org/"
+          data-node="internet-archive"
+          data-label="internet archive"
+          aria-label="internet archive"
+          target="_blank"
+          rel="noreferrer"
+          style="--x: 76; --y: 39;"
+        >
+          <pre aria-hidden="true"></pre>
+          <span class="node-label" aria-hidden="true">internet archive</span>
+        </a>
+
+        <a
+          class="node"
+          href="https://bandcamp.com/"
+          data-node="bandcamp"
+          data-label="bandcamp"
+          aria-label="bandcamp"
+          target="_blank"
+          rel="noreferrer"
+          style="--x: 58; --y: 50;"
+        >
+          <pre aria-hidden="true"></pre>
+          <span class="node-label" aria-hidden="true">bandcamp</span>
+        </a>
+
+        <a
+          class="node"
+          href="https://music.youtube.com/"
+          data-node="youtube"
+          data-label="youtube music"
+          aria-label="youtube music"
+          target="_blank"
+          rel="noreferrer"
+          style="--x: 76; --y: 61;"
+        >
+          <pre aria-hidden="true"></pre>
+          <span class="node-label" aria-hidden="true">youtube music</span>
+        </a>
+
+        <a
+          class="node"
+          href="https://soundcloud.com/"
+          data-node="soundcloud"
+          data-label="soundcloud"
+          aria-label="soundcloud"
+          target="_blank"
+          rel="noreferrer"
+          style="--x: 58; --y: 72;"
+        >
+          <pre aria-hidden="true"></pre>
+          <span class="node-label" aria-hidden="true">soundcloud</span>
+        </a>
+      </nav>
     </main>
+
+    <script src="pretext.js"></script>
+    <script src="ascii-image.js"></script>
+    <script src="site.js"></script>
   </body>
 </html>

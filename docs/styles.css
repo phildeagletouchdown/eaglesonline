@@ -184,6 +184,22 @@ h1 {
   white-space: pre-wrap;
 }
 
+.venue-link {
+  text-decoration: none;
+}
+
+.venue-link:hover,
+.venue-link:focus-visible {
+  text-decoration: underline;
+  outline: 0;
+}
+
+.venue-link.is-linked {
+  font-weight: bolder;
+  text-decoration: underline;
+  padding: 0 0.2em;
+}
+
 .contact-page {
   align-content: start;
   padding-top: clamp(86px, 16vh, 140px);

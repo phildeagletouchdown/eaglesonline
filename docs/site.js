@@ -2,10 +2,13 @@
 const asciiLayer = document.querySelector(".ascii-layer");
 const stage = document.querySelector(".stage");
 const pretext = new window.PretextEngine(asciiLayer, { paddingCells: 0 });
+const mobileBackdropQuery = window.matchMedia("(max-width: 700px)");
 const backdropImage = new window.ImageAsciiSource("backdrop.png", {
   invert: true,
   charset: " .:-=+*#%@"
 });
+let backdropCandidates = [];
+let backdropCandidateIndex = 0;
 
 const nodeByName = new Map(nodes.map((node) => [node.dataset.node, node]));
 const links = nodes.flatMap((node, index) =>
@@ -34,6 +37,37 @@ borderMeasureProbe.style.top = "0";
 borderMeasureProbe.style.whiteSpace = "pre";
 borderMeasureProbe.style.pointerEvents = "none";
 document.body.appendChild(borderMeasureProbe);
+
+function uniqueSources(...sources) {
+  return sources.filter((source, index, list) => source && list.indexOf(source) === index);
+}
+
+function backdropSources() {
+  const desktopSource = stage.dataset.backdrop || "backdrop.png";
+  const mobileSource = stage.dataset.backdropMobile || desktopSource;
+  const desktopFallback = stage.dataset.backdropFallback || "";
+  const mobileFallback = stage.dataset.backdropMobileFallback || desktopFallback;
+
+  if (mobileBackdropQuery.matches) {
+    return uniqueSources(mobileSource, mobileFallback, desktopSource, desktopFallback);
+  }
+
+  return uniqueSources(desktopSource, desktopFallback);
+}
+
+function updateBackdropSource() {
+  const nextCandidates = backdropSources();
+  if (
+    backdropCandidates.length === nextCandidates.length &&
+    backdropCandidates.every((candidate, index) => candidate === nextCandidates[index])
+  ) {
+    return;
+  }
+
+  backdropCandidates = nextCandidates;
+  backdropCandidateIndex = 0;
+  backdropImage.setSource(backdropCandidates[backdropCandidateIndex]);
+}
 
 nodes.forEach((node) => {
   const label = node.dataset.label || node.dataset.node || "";
@@ -79,7 +113,16 @@ fetch("backdrop.txt")
     backdropWords = fallbackBackdrop.split(/\s+/);
   });
 
-backdropImage.onchange = startAnimation;
+backdropImage.onchange = () => {
+  if (backdropImage.failed && backdropCandidateIndex < backdropCandidates.length - 1) {
+    backdropCandidateIndex += 1;
+    backdropImage.setSource(backdropCandidates[backdropCandidateIndex]);
+    return;
+  }
+
+  startAnimation();
+};
+updateBackdropSource();
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
@@ -345,6 +388,12 @@ window.addEventListener("blur", () => {
 window.addEventListener("resize", () => {
   resetNodeBorderTargets();
 });
+
+if (typeof mobileBackdropQuery.addEventListener === "function") {
+  mobileBackdropQuery.addEventListener("change", updateBackdropSource);
+} else if (typeof mobileBackdropQuery.addListener === "function") {
+  mobileBackdropQuery.addListener(updateBackdropSource);
+}
 
 if (document.fonts) {
   document.fonts.ready.then(() => {

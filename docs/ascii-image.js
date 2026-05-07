@@ -1,6 +1,6 @@
 class ImageAsciiSource {
   constructor(src, options = {}) {
-    this.src = src;
+    this.src = "";
     this.charset = options.charset || "wholetamdis";
     this.invert = options.invert || false;
     this.cache = new Map();
@@ -9,49 +9,165 @@ class ImageAsciiSource {
     this.onchange = null;
     this.canvas = document.createElement("canvas");
     this.context = this.canvas.getContext("2d", { willReadFrequently: true });
-    this.image = new Image();
-    this.image.decoding = "async";
+    this.media = null;
+    this.mediaKind = "image";
+    this.loadToken = 0;
+    this.lastAnimatedRows = null;
+    this.lastAnimatedSignature = "";
+    this.setSource(src);
+  }
 
-    this.image.addEventListener("load", () => {
+  isVideoSource(src) {
+    return /\.(mp4|webm|ogv|ogg)(?:$|[?#])/i.test(src);
+  }
+
+  resetState() {
+    this.ready = false;
+    this.failed = false;
+    this.cache.clear();
+    this.lastAnimatedRows = null;
+    this.lastAnimatedSignature = "";
+  }
+
+  notifyChange() {
+    if (this.onchange) this.onchange();
+  }
+
+  attachImage(media, token) {
+    media.decoding = "async";
+    media.addEventListener("load", () => {
+      if (token !== this.loadToken) return;
       this.ready = true;
       this.failed = false;
       this.cache.clear();
-      if (this.onchange) this.onchange();
+      this.notifyChange();
     });
-
-    this.image.addEventListener("error", () => {
+    media.addEventListener("error", () => {
+      if (token !== this.loadToken) return;
+      this.ready = false;
       this.failed = true;
-      if (this.onchange) this.onchange();
+      this.notifyChange();
     });
+  }
 
-    this.image.src = src;
+  attachVideo(media, token) {
+    const markReady = () => {
+      if (token !== this.loadToken) return;
+      if (media.videoWidth <= 0 || media.videoHeight <= 0) return;
+      this.ready = true;
+      this.failed = false;
+      this.notifyChange();
+    };
+
+    const markFailed = () => {
+      if (token !== this.loadToken) return;
+      this.ready = false;
+      this.failed = true;
+      this.notifyChange();
+    };
+
+    media.muted = true;
+    media.loop = true;
+    media.autoplay = true;
+    media.playsInline = true;
+    media.preload = "auto";
+    media.addEventListener("loadeddata", markReady);
+    media.addEventListener("canplay", markReady);
+    media.addEventListener("playing", markReady);
+    media.addEventListener("error", markFailed);
+  }
+
+  setSource(src) {
+    if (this.src === src) return;
+
+    this.loadToken += 1;
+    this.src = src;
+    this.resetState();
+
+    if (this.media && this.mediaKind === "video") {
+      this.media.pause();
+      this.media.removeAttribute("src");
+      this.media.load();
+    }
+
+    const token = this.loadToken;
+    this.mediaKind = this.isVideoSource(src) ? "video" : "image";
+    this.media = this.mediaKind === "video" ? document.createElement("video") : new Image();
+
+    if (this.mediaKind === "video") {
+      this.attachVideo(this.media, token);
+      this.media.src = src;
+      this.media.load();
+      this.media.play().catch(() => {});
+      return;
+    }
+
+    this.attachImage(this.media, token);
+    this.media.src = src;
+  }
+
+  currentSignature(bounds) {
+    const sizeKey = `${bounds.cols}x${bounds.rows}`;
+    if (this.mediaKind !== "video") return sizeKey;
+
+    const frameTime = Number.isFinite(this.media.currentTime)
+      ? this.media.currentTime.toFixed(3)
+      : "0.000";
+    return `${sizeKey}@${frameTime}`;
   }
 
   getRows(bounds) {
-    if (!this.ready || this.failed || !this.context) return null;
+    if (!this.ready || this.failed || !this.context || !this.media) return null;
 
-    const key = `${bounds.cols}x${bounds.rows}`;
-    if (!this.cache.has(key)) {
-      this.cache.set(key, this.convert(bounds));
+    const signature = this.currentSignature(bounds);
+
+    if (this.mediaKind === "video") {
+      if (this.lastAnimatedSignature !== signature) {
+        this.lastAnimatedSignature = signature;
+        this.lastAnimatedRows = this.convert(bounds);
+      }
+
+      return this.lastAnimatedRows;
     }
 
-    return this.cache.get(key);
+    if (!this.cache.has(signature)) {
+      this.cache.set(signature, this.convert(bounds));
+    }
+
+    return this.cache.get(signature);
+  }
+
+  sourceDimensions() {
+    if (!this.media) return { width: 0, height: 0 };
+
+    if (this.mediaKind === "video") {
+      return {
+        width: this.media.videoWidth,
+        height: this.media.videoHeight
+      };
+    }
+
+    return {
+      width: this.media.naturalWidth,
+      height: this.media.naturalHeight
+    };
   }
 
   sourceCrop(bounds) {
-    const imageAspect = this.image.naturalWidth / this.image.naturalHeight;
+    const { width, height } = this.sourceDimensions();
+    const imageAspect = width / height;
     const gridAspect = (bounds.cols * bounds.cellW) / (bounds.rows * bounds.cellH);
     let sx = 0;
     let sy = 0;
-    let sw = this.image.naturalWidth;
-    let sh = this.image.naturalHeight;
+    let sw = width;
+    let sh = height;
 
     if (imageAspect > gridAspect) {
       sw = sh * gridAspect;
-      sx = (this.image.naturalWidth - sw) / 2;
+      sx = (width - sw) / 2;
     } else {
       sh = sw / gridAspect;
-      sy = (this.image.naturalHeight - sh) / 2;
+      sy = 0;
     }
 
     return { sx, sy, sw, sh };
@@ -65,7 +181,7 @@ class ImageAsciiSource {
     this.canvas.height = rows;
     this.context.clearRect(0, 0, cols, rows);
     this.context.drawImage(
-      this.image,
+      this.media,
       crop.sx,
       crop.sy,
       crop.sw,

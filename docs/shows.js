@@ -17,7 +17,8 @@ function normalizeShow(show) {
   return {
     date: normalizeDate(show.date),
     location: String(show.location || ""),
-    bands: Array.isArray(show.bands) ? show.bands.map(String) : []
+    bands: Array.isArray(show.bands) ? show.bands.map(String) : [],
+    ticketUrl: typeof show.ticketUrl === "string" ? show.ticketUrl.trim() : ""
   };
 }
 
@@ -37,22 +38,56 @@ function formatBands(bands) {
   return bands.length > 0 ? bands.join(" / ") : "tba";
 }
 
-function showLine(show) {
-  return `${show.date}  ${show.location}\n            ${formatBands(show.bands)}`;
+function escapeHtml(value) {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function splitLocation(location) {
+  const marker = " - ";
+  const index = location.indexOf(marker);
+
+  if (index === -1) {
+    return { city: "", venue: location };
+  }
+
+  return {
+    city: location.slice(0, index),
+    venue: location.slice(index + marker.length)
+  };
+}
+
+function renderVenue(show) {
+  const { city, venue } = splitLocation(show.location);
+  const venueHtml = escapeHtml(venue);
+
+  if (!show.ticketUrl) {
+    return city ? `${escapeHtml(city)} - ${venueHtml}` : venueHtml;
+  }
+
+  const link = `<a class="venue-link is-linked" href="${escapeHtml(show.ticketUrl)}" target="_blank" rel="noreferrer">${venueHtml}</a>`;
+  return city ? `${escapeHtml(city)} - ${link}` : link;
+}
+
+function renderShow(show) {
+  return `${escapeHtml(show.date)}  ${renderVenue(show)}\n            ${escapeHtml(formatBands(show.bands))}`;
 }
 
 function section(title, shows) {
-  const lines = shows.length > 0 ? shows.map(showLine).join("\n\n") : "none listed";
+  const lines = shows.length > 0 ? shows.map(renderShow).join("\n\n") : "none listed";
 
   return `
-${title}
+${escapeHtml(title)}
 ${"-".repeat(title.length)}
 ${lines}`;
 }
 
 function renderShows(data) {
   todayNode.textContent = `current date: ${data.today}`;
-  listRoot.textContent = `${section("future shows", data.future)}\n\n${section("past shows", data.past)}`;
+  listRoot.innerHTML = `${section("future shows", data.future)}\n\n${section("past shows", data.past)}`;
 }
 
 function fetchJson(path) {
