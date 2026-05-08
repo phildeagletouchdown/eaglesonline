@@ -24,7 +24,7 @@ let mouse = {
   y: window.innerHeight / 2,
   active: false
 };
-let currentAsciiSize = window.innerWidth <= 700 ? 16 : 22;
+let currentAsciiSize = window.innerWidth <= 700 ? 12 : 22;
 let lastRenderedNodeSize = 0;
 let lastNodeLayoutMode = "";
 const nodeBorderTargets = new WeakMap();
@@ -71,6 +71,8 @@ function updateBackdropSource() {
 
 nodes.forEach((node) => {
   const label = node.dataset.label || node.dataset.node || "";
+  const baseX = node.style.getPropertyValue("--x").trim();
+  const baseY = node.style.getPropertyValue("--y").trim();
   let borderNode = node.querySelector(".node-border") || node.querySelector("pre");
   let fillNode = node.querySelector(".node-fill");
   let labelNode = node.querySelector(".node-label");
@@ -98,7 +100,20 @@ nodes.forEach((node) => {
   }
 
   labelNode.textContent = label;
+  if (baseX) node.dataset.desktopX = baseX;
+  if (baseY) node.dataset.desktopY = baseY;
 });
+
+function syncNodePositions() {
+  const compact = window.innerWidth <= 700;
+
+  nodes.forEach((node) => {
+    const x = compact ? node.dataset.mobileX || node.dataset.desktopX : node.dataset.desktopX;
+    const y = compact ? node.dataset.mobileY || node.dataset.desktopY : node.dataset.desktopY;
+    if (x) node.style.setProperty("--x", x);
+    if (y) node.style.setProperty("--y", y);
+  });
+}
 
 fetch("backdrop.txt")
   .then((response) => {
@@ -145,8 +160,8 @@ function nearestNodeDistance() {
 
 function updateAsciiSize() {
   const compact = window.innerWidth <= 700;
-  const minSize = compact ? 5 : 6;
-  const maxSize = compact ? 15 : 25;
+  const minSize = compact ? 4 : 6;
+  const maxSize = compact ? 12 : 25;
   const influence = compact ? 300 : 560;
   const distance = nearestNodeDistance();
   const ratio = clamp(distance / influence, 0, 1);
@@ -386,6 +401,7 @@ window.addEventListener("blur", () => {
 });
 
 window.addEventListener("resize", () => {
+  syncNodePositions();
   resetNodeBorderTargets();
 });
 
@@ -401,5 +417,6 @@ if (document.fonts) {
   });
 }
 
+syncNodePositions();
 resetNodeBorderTargets();
 startAnimation();

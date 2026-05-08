@@ -21,6 +21,10 @@ class ImageAsciiSource {
     return /\.(mp4|webm|ogv|ogg)(?:$|[?#])/i.test(src);
   }
 
+  isLeftAlignedSource() {
+    return /(^|\/)backdrop(?:mobile)?\.mp4(?:$|[?#])/i.test(this.src);
+  }
+
   resetState() {
     this.ready = false;
     this.failed = false;
@@ -164,7 +168,7 @@ class ImageAsciiSource {
 
     if (imageAspect > gridAspect) {
       sw = sh * gridAspect;
-      sx = (width - sw) / 2;
+      sx = this.isLeftAlignedSource() ? 0 : (width - sw) / 2;
     } else {
       sh = sw / gridAspect;
       sy = 0;
