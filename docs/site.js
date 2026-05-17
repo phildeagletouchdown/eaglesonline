@@ -29,7 +29,7 @@ let lastRenderedNodeSize = 0;
 let lastNodeLayoutMode = "";
 const nodeBorderTargets = new WeakMap();
 const borderMeasureProbe = document.createElement("span");
-borderMeasureProbe.textContent = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+borderMeasureProbe.textContent = "THEONLYWAYOUTISTHROUGH";
 borderMeasureProbe.setAttribute("aria-hidden", "true");
 borderMeasureProbe.style.position = "fixed";
 borderMeasureProbe.style.left = "-9999px";
@@ -43,7 +43,7 @@ function uniqueSources(...sources) {
 }
 
 function backdropSources() {
-  const desktopSource = stage.dataset.backdrop || "backdrop.png";
+  const desktopSource = stage.dataset.backdrop || "backdrop_cash.mp4";
   const mobileSource = stage.dataset.backdropMobile || desktopSource;
   const desktopFallback = stage.dataset.backdropFallback || "";
   const mobileFallback = stage.dataset.backdropMobileFallback || desktopFallback;
@@ -73,24 +73,11 @@ nodes.forEach((node) => {
   const label = node.dataset.label || node.dataset.node || "";
   const baseX = node.style.getPropertyValue("--x").trim();
   const baseY = node.style.getPropertyValue("--y").trim();
-  let borderNode = node.querySelector(".node-border") || node.querySelector("pre");
-  let fillNode = node.querySelector(".node-fill");
   let labelNode = node.querySelector(".node-label");
 
-  if (!borderNode) {
-    borderNode = document.createElement("pre");
-    borderNode.setAttribute("aria-hidden", "true");
-    node.prepend(borderNode);
-  }
-
-  borderNode.className = "node-border";
-
-  if (!fillNode) {
-    fillNode = document.createElement("pre");
-    fillNode.className = "node-fill";
-    fillNode.setAttribute("aria-hidden", "true");
-    node.insertBefore(fillNode, borderNode);
-  }
+  node.querySelectorAll("pre").forEach((pre) => {
+    pre.textContent = "";
+  });
 
   if (!labelNode) {
     labelNode = document.createElement("span");
@@ -171,8 +158,8 @@ function updateAsciiSize() {
   const renderedSize = Math.round(currentAsciiSize);
 
   asciiLayer.style.setProperty("--bg-text-size", `${renderedSize}px`);
-  stage.style.setProperty("--border-text-size", `${renderedSize}px`);
-  renderNodeBorders(renderedSize);
+  stage.style.setProperty("--bg-text-size", `${renderedSize}px`);
+  syncNodeBoxes(renderedSize);
 }
 
 function nodeLayoutMode() {
@@ -206,7 +193,7 @@ function measureBorderCell(size, element = document.body) {
 
 function calculateNodeBorderTarget(node) {
   const baseSize = maxBorderSizeForLayout();
-  const baseCellWidth = measureBorderCell(baseSize, node);
+  const baseCellWidth = measureBorderCell(baseSize, asciiLayer);
   const label = node.dataset.label || node.dataset.node || "";
   const labelNode = node.querySelector(".node-label");
   const labelBox = labelNode.getBoundingClientRect();
@@ -237,97 +224,12 @@ function resetNodeBorderTargets() {
   lastRenderedNodeSize = 0;
 }
 
-function createBlankGrid(rows, cols) {
-  return Array.from({ length: rows }, () => Array.from({ length: cols }, () => " "));
-}
-
-function clearCenteredGridGap(grid, cols, rows) {
-  const left = Math.max(0, Math.floor((grid[0].length - cols) / 2));
-  const right = Math.min(grid[0].length - 1, left + cols - 1);
-  const top = Math.max(0, Math.floor((grid.length - rows) / 2));
-  const bottom = Math.min(grid.length - 1, top + rows - 1);
-
-  for (let y = top; y <= bottom; y += 1) {
-    for (let x = left; x <= right; x += 1) {
-      grid[y][x] = " ";
-    }
-  }
-}
-
-function renderCircleLayers(totalColumns, totalRows, cellWidth, cellHeight, gapColumns, gapRows) {
-  const borderGrid = createBlankGrid(totalRows, totalColumns);
-  const fillGrid = createBlankGrid(totalRows, totalColumns);
-  const width = totalColumns * cellWidth;
-  const height = totalRows * cellHeight;
-  const strokeWidth = Math.max(1.8, Math.min(cellWidth, cellHeight) * 0.82);
-  const center = {
-    x: width / 2,
-    y: height / 2
-  };
-  const radius = Math.min(width, height) / 2 * 0.94;
-  const centerColumn = (totalColumns - 1) / 2;
-
-  for (let y = 0; y < totalRows; y += 1) {
-    for (let x = Math.ceil(centerColumn); x < totalColumns; x += 1) {
-      const point = {
-        x: (x + 0.5) * cellWidth,
-        y: (y + 0.5) * cellHeight
-      };
-      const distance = Math.hypot(point.x - center.x, point.y - center.y);
-      const inCircle = distance <= radius;
-      const onCircle = Math.abs(distance - radius) <= strokeWidth;
-      const mirrorX = Math.round(centerColumn - (x - centerColumn));
-
-      if (inCircle) {
-        fillGrid[y][x] = "█";
-        fillGrid[y][mirrorX] = "█";
-      }
-
-      if (onCircle) {
-        borderGrid[y][x] = "*";
-        borderGrid[y][mirrorX] = "*";
-      }
-    }
-  }
-
-  clearCenteredGridGap(borderGrid, gapColumns, gapRows);
-
-  return {
-    border: borderGrid.map((row) => row.join("")).join("\n"),
-    fill: fillGrid.map((row) => row.join("")).join("\n")
-  };
-}
-
-function writeStableNodeBox(node, target, size, borderCellWidth) {
-  const totalColumns = Math.max(3, Math.round(target.width / borderCellWidth));
-  const totalRows = Math.max(9, Math.round(target.height / size));
-  const labelBox = node.querySelector(".node-label").getBoundingClientRect();
-  const cellWidth = target.width / totalColumns;
-  const cellHeight = target.height / totalRows;
-  const gapColumns = Math.ceil((labelBox.width + 12) / cellWidth);
-  const gapRows = Math.ceil((labelBox.height + 8) / cellHeight);
-  const letterSpacing = totalColumns > 1
-    ? (target.width - borderCellWidth * totalColumns) / (totalColumns - 1)
-    : 0;
-  const lineHeight = target.height / totalRows;
-
+function writeStableNodeBox(node, target) {
   node.style.setProperty("--node-border-width", `${target.width}px`);
   node.style.setProperty("--node-border-height", `${target.height}px`);
-  node.style.setProperty("--node-border-letter-spacing", `${letterSpacing}px`);
-  node.style.setProperty("--node-border-line-height", `${lineHeight}px`);
-  const circle = renderCircleLayers(
-    totalColumns,
-    totalRows,
-    cellWidth,
-    cellHeight,
-    gapColumns,
-    gapRows
-  );
-  node.querySelector(".node-border").textContent = circle.border;
-  node.querySelector(".node-fill").textContent = circle.fill;
 }
 
-function renderNodeBorders(size) {
+function syncNodeBoxes(size) {
   if (lastNodeLayoutMode !== nodeLayoutMode()) {
     resetNodeBorderTargets();
   }
@@ -336,10 +238,9 @@ function renderNodeBorders(size) {
   lastRenderedNodeSize = size;
 
   nodes.forEach((node) => {
-    const borderCellWidth = measureBorderCell(size, node);
     const target = nodeBorderTargets.get(node) || calculateNodeBorderTarget(node);
     nodeBorderTargets.set(node, target);
-    writeStableNodeBox(node, target, size, borderCellWidth);
+    writeStableNodeBox(node, target);
   });
 }
 
@@ -350,6 +251,19 @@ function nodeCenter(node) {
   return {
     x: nodeBox.left - stageBox.left + nodeBox.width / 2,
     y: nodeBox.top - stageBox.top + nodeBox.height / 2
+  };
+}
+
+function nodeShape(node) {
+  const stageBox = stage.getBoundingClientRect();
+  const nodeBox = node.getBoundingClientRect();
+
+  return {
+    x: nodeBox.left - stageBox.left + nodeBox.width / 2,
+    y: nodeBox.top - stageBox.top + nodeBox.height / 2,
+    width: nodeBox.width,
+    height: nodeBox.height,
+    label: node.dataset.label || node.dataset.node || ""
   };
 }
 
@@ -368,6 +282,7 @@ function renderAscii(time = 0) {
     words: backdropWords,
     wordOffset,
     connectors,
+    nodes: nodes.map(nodeShape),
     backgroundRows
   });
 }

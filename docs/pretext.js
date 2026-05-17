@@ -101,6 +101,51 @@ class PretextEngine {
     }
   }
 
+  drawNodeCircle(grid, bounds, node) {
+    const radius = Math.min(node.width, node.height) * 0.47;
+    const strokeWidth = Math.max(1.8, Math.min(bounds.cellW, bounds.cellH) * 0.82);
+    const left = Math.max(0, Math.floor((node.x - radius - strokeWidth) / bounds.cellW));
+    const right = Math.min(bounds.cols - 1, Math.ceil((node.x + radius + strokeWidth) / bounds.cellW));
+    const top = Math.max(0, Math.floor((node.y - radius - strokeWidth) / bounds.cellH));
+    const bottom = Math.min(bounds.rows - 1, Math.ceil((node.y + radius + strokeWidth) / bounds.cellH));
+    const label = String(node.label || "");
+    const labelRow = Math.round(node.y / bounds.cellH);
+    const labelStart = Math.round(node.x / bounds.cellW - label.length / 2);
+    const labelEnd = labelStart + label.length - 1;
+
+    for (let y = top; y <= bottom; y += 1) {
+      for (let x = left; x <= right; x += 1) {
+        const px = (x + 0.5) * bounds.cellW;
+        const py = (y + 0.5) * bounds.cellH;
+        const distance = Math.hypot(px - node.x, py - node.y);
+        const inCircle = distance <= radius;
+        const onCircle = Math.abs(distance - radius) <= strokeWidth;
+        const inLabelGap = y === labelRow && x >= labelStart - 1 && x <= labelEnd + 1;
+
+        if (inCircle) {
+          grid[y][x].char = " ";
+        }
+
+        if (onCircle && !inLabelGap) {
+          grid[y][x].char = "█";
+        }
+      }
+    }
+  }
+
+  drawNodeLabel(grid, bounds, node) {
+    const label = String(node.label || "");
+    const labelRow = Math.round(node.y / bounds.cellH);
+    const labelStart = Math.round(node.x / bounds.cellW - label.length / 2);
+
+    for (let i = 0; i < label.length; i += 1) {
+      const x = labelStart + i;
+
+      if (x < 0 || x >= bounds.cols || labelRow < 0 || labelRow >= bounds.rows) continue;
+      grid[labelRow][x].char = label[i];
+    }
+  }
+
   canPlaceWord(grid, bounds, word, x, y) {
     if (x + word.length > bounds.cols) return false;
 
@@ -173,7 +218,15 @@ class PretextEngine {
     }
   }
 
-  render({ stage, exclusions, words, wordOffset, connectors, backgroundRows }) {
+  render({
+    stage,
+    exclusions = [],
+    words = [],
+    wordOffset = 0,
+    connectors = [],
+    nodes = [],
+    backgroundRows
+  }) {
     const bounds = this.measure();
     const grid = this.createGrid(bounds.rows, bounds.cols);
     const hasBackground = Array.isArray(backgroundRows) && backgroundRows.length > 0;
@@ -190,6 +243,14 @@ class PretextEngine {
 
     connectors.forEach(([start, end]) => {
       this.drawLine(grid, bounds, start, end);
+    });
+
+    nodes.forEach((node) => {
+      this.drawNodeCircle(grid, bounds, node);
+    });
+
+    nodes.forEach((node) => {
+      this.drawNodeLabel(grid, bounds, node);
     });
 
     this.layer.textContent = grid

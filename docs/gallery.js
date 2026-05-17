@@ -7,7 +7,7 @@ const galleryImages = [
 
 const transitionMs = 360;
 const borderProbe = document.createElement("span");
-borderProbe.textContent = "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+borderProbe.textContent = "THEONLYWAYOUTISTHROUGH";
 borderProbe.setAttribute("aria-hidden", "true");
 borderProbe.style.position = "fixed";
 borderProbe.style.left = "-9999px";

@@ -6,8 +6,6 @@
   --line: #d8d8d8;
   --focus: #ffffff;
   --bg-text-size: 22px;
-  --border-text-size: 22px;
-  --label-text-size: 16px;
   --ocr-font: "OCR A Std", "OCR A Extended", "OCR A", "OCR-A", monospace;
 }
 
@@ -98,26 +96,7 @@ h1 {
 }
 
 .node pre {
-  position: absolute;
-  inset: 0;
-  margin: 0;
-  overflow: hidden;
-  font-family: var(--ocr-font);
-  font-size: var(--border-text-size);
-  font-weight: inherit;
-  line-height: var(--node-border-line-height, var(--border-text-size));
-  letter-spacing: var(--node-border-letter-spacing, 0);
-  white-space: pre;
-}
-
-.node-fill {
-  z-index: 0;
-  color: var(--paper);
-}
-
-.node-border {
-  z-index: 1;
-  color: var(--ink);
+  display: none;
 }
 
 .node-label {
@@ -126,10 +105,11 @@ h1 {
   top: 50%;
   z-index: 2;
   color: var(--ink);
-  font: var(--label-text-size) / 1 var(--ocr-font);
+  font: var(--bg-text-size) / var(--bg-text-size) var(--ocr-font);
   letter-spacing: 0;
   pointer-events: none;
   transform: translate(-50%, -50%);
+  visibility: hidden;
   white-space: nowrap;
 }
 
