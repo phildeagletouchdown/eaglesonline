@@ -102,13 +102,19 @@ class PretextEngine {
   }
 
   drawNodeCircle(grid, bounds, node) {
-    const radius = Math.min(node.width, node.height) * 0.47;
-    const strokeWidth = Math.max(1.8, Math.min(bounds.cellW, bounds.cellH) * 0.82);
-    const left = Math.max(0, Math.floor((node.x - radius - strokeWidth) / bounds.cellW));
-    const right = Math.min(bounds.cols - 1, Math.ceil((node.x + radius + strokeWidth) / bounds.cellW));
-    const top = Math.max(0, Math.floor((node.y - radius - strokeWidth) / bounds.cellH));
-    const bottom = Math.min(bounds.rows - 1, Math.ceil((node.y + radius + strokeWidth) / bounds.cellH));
+    const strokeWidth = Math.max(3, Math.min(bounds.cellW, bounds.cellH) * 1.2);
+    const outline = node.outline || "█";
+    const halfSize = Math.min(node.width, node.height) * 0.47;
+    const squareLeft = node.x - halfSize;
+    const squareRight = node.x + halfSize;
+    const squareTop = node.y - halfSize;
+    const squareBottom = node.y + halfSize;
+    const left = Math.max(0, Math.floor((squareLeft - strokeWidth) / bounds.cellW));
+    const right = Math.min(bounds.cols - 1, Math.ceil((squareRight + strokeWidth) / bounds.cellW));
+    const top = Math.max(0, Math.floor((squareTop - strokeWidth) / bounds.cellH));
+    const bottom = Math.min(bounds.rows - 1, Math.ceil((squareBottom + strokeWidth) / bounds.cellH));
     const label = String(node.label || "");
+    const hasLabel = label.length > 0;
     const labelRow = Math.round(node.y / bounds.cellH);
     const labelStart = Math.round(node.x / bounds.cellW - label.length / 2);
     const labelEnd = labelStart + label.length - 1;
@@ -117,17 +123,21 @@ class PretextEngine {
       for (let x = left; x <= right; x += 1) {
         const px = (x + 0.5) * bounds.cellW;
         const py = (y + 0.5) * bounds.cellH;
-        const distance = Math.hypot(px - node.x, py - node.y);
-        const inCircle = distance <= radius;
-        const onCircle = Math.abs(distance - radius) <= strokeWidth;
-        const inLabelGap = y === labelRow && x >= labelStart - 1 && x <= labelEnd + 1;
+        const inSquare = px >= squareLeft && px <= squareRight && py >= squareTop && py <= squareBottom;
+        const onSquare =
+          inSquare &&
+          (px - squareLeft <= strokeWidth ||
+            squareRight - px <= strokeWidth ||
+            py - squareTop <= strokeWidth ||
+            squareBottom - py <= strokeWidth);
+        const inLabelGap = hasLabel && y === labelRow && x >= labelStart - 1 && x <= labelEnd + 1;
 
-        if (inCircle) {
-          grid[y][x].char = " ";
+        if (inSquare) {
+          grid[y][x].char = node.filled && !inLabelGap ? outline : " ";
         }
 
-        if (onCircle && !inLabelGap) {
-          grid[y][x].char = "█";
+        if (onSquare && !inLabelGap) {
+          grid[y][x].char = outline;
         }
       }
     }

@@ -14,6 +14,7 @@ const nodeByName = new Map(nodes.map((node) => [node.dataset.node, node]));
 const links = nodes.flatMap((node, index) =>
   nodes.slice(index + 1).map((target) => [node.dataset.node, target.dataset.node])
 );
+const circleGridSeed = Math.floor(Math.random() * 0x7fffffff);
 const fallbackBackdrop = `
 THE ONLY WAY OUT IS THROUGH
 `.trim();
@@ -24,9 +25,11 @@ let mouse = {
   y: window.innerHeight / 2,
   active: false
 };
-let currentAsciiSize = window.innerWidth <= 700 ? 12 : 22;
+let currentAsciiSize = window.innerWidth <= 700 ? 10 : 18;
 let lastRenderedNodeSize = 0;
 let lastNodeLayoutMode = "";
+let circleGridSignature = "";
+let circleGridShapes = [];
 const nodeBorderTargets = new WeakMap();
 const borderMeasureProbe = document.createElement("span");
 borderMeasureProbe.textContent = "THEONLYWAYOUTISTHROUGH";
@@ -92,6 +95,8 @@ nodes.forEach((node) => {
 });
 
 function syncNodePositions() {
+  if (usesCircleGrid() || usesSpreadsheet()) return;
+
   const compact = window.innerWidth <= 700;
 
   nodes.forEach((node) => {
@@ -130,6 +135,48 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+function usesCircleGrid() {
+  return stage.dataset.nodeLayout === "grid";
+}
+
+function usesSpreadsheet() {
+  return stage.dataset.nodeLayout === "spreadsheet";
+}
+
+function hashString(value) {
+  let hash = 2166136261;
+
+  for (let i = 0; i < value.length; i += 1) {
+    hash ^= value.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+
+  return hash >>> 0;
+}
+
+function randomFromSeed(seed) {
+  let state = seed >>> 0;
+
+  return () => {
+    state += 0x6d2b79f5;
+    let value = state;
+    value = Math.imul(value ^ (value >>> 15), value | 1);
+    value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+    return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shuffled(list, random) {
+  const output = [...list];
+
+  for (let i = output.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(random() * (i + 1));
+    [output[i], output[j]] = [output[j], output[i]];
+  }
+
+  return output;
+}
+
 function distanceToBox(x, y, box) {
   const dx = Math.max(box.left - x, 0, x - box.right);
   const dy = Math.max(box.top - y, 0, y - box.bottom);
@@ -148,7 +195,7 @@ function nearestNodeDistance() {
 function updateAsciiSize() {
   const compact = window.innerWidth <= 700;
   const minSize = compact ? 4 : 6;
-  const maxSize = compact ? 12 : 25;
+  const maxSize = compact ? 10 : 18;
   const influence = compact ? 300 : 560;
   const distance = nearestNodeDistance();
   const ratio = clamp(distance / influence, 0, 1);
@@ -214,8 +261,174 @@ function calculateNodeBorderTarget(node) {
   };
 }
 
+function circleGridDiameter(size) {
+  const cellWidth = measureBorderCell(size, asciiLayer);
+  const longestLabel = nodes.reduce((longest, node) => {
+    const label = node.dataset.label || node.dataset.node || "";
+    return label.length > longest.length ? label : longest;
+  }, "");
+  const labelWidth = longestLabel.length * cellWidth;
+  const labelPadding = Math.max(size * 1.2, cellWidth * 1.5);
+  const minimumDiameter = nodeLayoutMode() === "compact" ? size * 7.2 : size * 6.4;
+
+  return Math.max(minimumDiameter, labelWidth + labelPadding);
+}
+
+function cellKey(cell) {
+  return `${cell.col}:${cell.row}`;
+}
+
+function linkCellsForGrid(cells, count) {
+  const selected = [];
+
+  cells.forEach((cell) => {
+    if (selected.length >= count) return;
+    const hasNeighbor = selected.some((chosen) =>
+      Math.abs(chosen.col - cell.col) <= 1 && Math.abs(chosen.row - cell.row) <= 1
+    );
+
+    if (!hasNeighbor) selected.push(cell);
+  });
+
+  cells.forEach((cell) => {
+    if (selected.length >= count) return;
+    if (!selected.includes(cell)) selected.push(cell);
+  });
+
+  return selected.slice(0, count);
+}
+
+function buildCircleGrid(size) {
+  const stageBox = stage.getBoundingClientRect();
+  const layoutSize = maxBorderSizeForLayout();
+  const layoutDiameter = circleGridDiameter(layoutSize);
+  const diameter = layoutDiameter;
+  const gridWidth = stageBox.width;
+  const gridHeight = stageBox.height;
+  const gridTop = 0;
+  let columns = Math.max(1, Math.floor(gridWidth / layoutDiameter));
+  let rows = Math.max(1, Math.floor(gridHeight / layoutDiameter));
+
+  while (columns * rows < nodes.length) {
+    if (gridWidth / columns > gridHeight / rows) {
+      columns += 1;
+    } else {
+      rows += 1;
+    }
+  }
+
+  const cellWidth = gridWidth / columns;
+  const cellHeight = gridHeight / rows;
+  const cells = [];
+
+  for (let row = 0; row < rows; row += 1) {
+    for (let col = 0; col < columns; col += 1) {
+      cells.push({
+        col,
+        row,
+        x: (col + 0.5) * cellWidth,
+        y: gridTop + (row + 0.5) * cellHeight
+      });
+    }
+  }
+
+  return {
+    cells,
+    columns,
+    rows,
+    diameter,
+    width: stageBox.width,
+    height: stageBox.height,
+    signature: [
+      Math.round(stageBox.width),
+      Math.round(stageBox.height),
+      Math.round(gridHeight),
+      Math.round(layoutDiameter),
+      Math.round(diameter),
+      columns,
+      rows,
+      size
+    ].join(":"),
+    randomSignature: [
+      Math.round(stageBox.width),
+      Math.round(stageBox.height),
+      Math.round(layoutDiameter),
+      columns,
+      rows
+    ].join(":")
+  };
+}
+
+function syncCircleGrid(size) {
+  const grid = buildCircleGrid(size);
+
+  if (grid.signature === circleGridSignature) return;
+
+  const random = randomFromSeed(hashString(`${circleGridSeed}:${grid.randomSignature}`));
+  const linkCells = linkCellsForGrid(shuffled(grid.cells, random), nodes.length);
+  const linkCellKeys = new Set(linkCells.map(cellKey));
+  const availableCells = grid.cells.filter((cell) => !linkCellKeys.has(cellKey(cell)));
+  const fillCount = Math.min(availableCells.length, Math.round(grid.cells.length * 0.1));
+  const totalOutlineCount = Math.max(nodes.length, Math.round(grid.cells.length * 0.25));
+  const outlineCount = Math.min(
+    availableCells.length - fillCount,
+    totalOutlineCount - nodes.length
+  );
+  const visibleCells = shuffled(availableCells, random);
+  const filledCellKeys = new Set(
+    visibleCells
+      .slice(0, fillCount)
+      .map(cellKey)
+  );
+  const outlinedCellKeys = new Set(
+    visibleCells
+      .slice(fillCount, fillCount + outlineCount)
+      .map(cellKey)
+  );
+  const nodeByCell = new Map();
+
+  nodes.forEach((node, index) => {
+    const cell = linkCells[index];
+    nodeByCell.set(cellKey(cell), node);
+    node.style.setProperty("--x", `${(cell.x / grid.width) * 100}`);
+    node.style.setProperty("--y", `${(cell.y / grid.height) * 100}`);
+    writeStableNodeBox(node, {
+      width: grid.diameter,
+      height: grid.diameter
+    });
+  });
+
+  circleGridShapes = grid.cells.map((cell) => {
+    const node = nodeByCell.get(cellKey(cell));
+    const key = cellKey(cell);
+
+    return {
+      x: cell.x,
+      y: cell.y,
+      width: grid.diameter,
+      height: grid.diameter,
+      label: usesCircleGrid() ? "" : node ? node.dataset.label || node.dataset.node || "" : "",
+      filled: filledCellKeys.has(key),
+      visible: Boolean(node) || filledCellKeys.has(key) || outlinedCellKeys.has(key),
+      outline: "█"
+    };
+  }).filter((shape) => shape.visible);
+  circleGridSignature = grid.signature;
+}
+
 function resetNodeBorderTargets() {
   lastNodeLayoutMode = nodeLayoutMode();
+
+  if (usesSpreadsheet()) {
+    lastRenderedNodeSize = 0;
+    return;
+  }
+
+  if (usesCircleGrid()) {
+    circleGridSignature = "";
+    lastRenderedNodeSize = 0;
+    return;
+  }
 
   nodes.forEach((node) => {
     nodeBorderTargets.set(node, calculateNodeBorderTarget(node));
@@ -230,8 +443,16 @@ function writeStableNodeBox(node, target) {
 }
 
 function syncNodeBoxes(size) {
+  if (usesSpreadsheet()) return;
+
   if (lastNodeLayoutMode !== nodeLayoutMode()) {
     resetNodeBorderTargets();
+  }
+
+  if (usesCircleGrid()) {
+    syncCircleGrid(size);
+    lastRenderedNodeSize = size;
+    return;
   }
 
   if (size === lastRenderedNodeSize) return;
@@ -270,10 +491,13 @@ function nodeShape(node) {
 function renderAscii(time = 0) {
   const bounds = pretext.measure();
   const backgroundRows = backdropImage.getRows(bounds);
-  const connectors = links.map(([from, to]) => [
-    nodeCenter(nodeByName.get(from)),
-    nodeCenter(nodeByName.get(to))
-  ]);
+  const connectors = usesCircleGrid() || usesSpreadsheet()
+    ? []
+    : links.map(([from, to]) => [
+      nodeCenter(nodeByName.get(from)),
+      nodeCenter(nodeByName.get(to))
+    ]);
+  const renderedNodes = usesSpreadsheet() ? [] : usesCircleGrid() ? circleGridShapes : nodes.map(nodeShape);
   const wordOffset = Math.floor(time * 0.0016) % backdropWords.length;
 
   pretext.render({
@@ -282,7 +506,7 @@ function renderAscii(time = 0) {
     words: backdropWords,
     wordOffset,
     connectors,
-    nodes: nodes.map(nodeShape),
+    nodes: renderedNodes,
     backgroundRows
   });
 }
