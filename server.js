@@ -4,6 +4,7 @@ const path = require("path");
 
 const port = Number(process.argv[2] || process.env.PORT || 3000);
 const siteDir = path.join(__dirname, "docs");
+const dataDir = path.join(__dirname, "data");
 const showsDbPath = path.join(__dirname, "data", "shows.json");
 
 const mimeTypes = {
@@ -12,20 +13,40 @@ const mimeTypes = {
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
   ".txt": "text/plain; charset=utf-8",
+  ".jpg": "image/jpeg",
+  ".jpeg": "image/jpeg",
   ".png": "image/png",
+  ".mp4": "video/mp4",
   ".ico": "image/x-icon"
 };
 
-function resolvePath(urlPath) {
+function resolvePath(urlPath, baseDir = siteDir) {
   const cleanPath = decodeURIComponent(urlPath.split("?")[0]);
   const filePath = cleanPath === "/" ? "/index.html" : cleanPath;
-  const resolved = path.normalize(path.join(siteDir, filePath));
+  const resolved = path.normalize(path.join(baseDir, filePath));
 
-  if (!resolved.startsWith(siteDir)) {
+  if (!resolved.startsWith(baseDir)) {
     return null;
   }
 
   return resolved;
+}
+
+function sendFile(res, resolved) {
+  fs.readFile(resolved, (error, data) => {
+    if (error) {
+      res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+      res.end("Not found");
+      return;
+    }
+
+    const ext = path.extname(resolved);
+    res.writeHead(200, {
+      "Content-Type": mimeTypes[ext] || "application/octet-stream",
+      "Cache-Control": "no-store"
+    });
+    res.end(data);
+  });
 }
 
 function localDateISO(date = new Date()) {
@@ -153,6 +174,19 @@ const server = http.createServer((req, res) => {
     return;
   }
 
+  if (cleanPath.startsWith("/data/")) {
+    const resolved = resolvePath(cleanPath.slice("/data".length), dataDir);
+
+    if (!resolved) {
+      res.writeHead(403);
+      res.end("Forbidden");
+      return;
+    }
+
+    sendFile(res, resolved);
+    return;
+  }
+
   const resolved = resolvePath(req.url || "/");
 
   if (!resolved) {
@@ -161,20 +195,7 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  fs.readFile(resolved, (error, data) => {
-    if (error) {
-      res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-      res.end("Not found");
-      return;
-    }
-
-    const ext = path.extname(resolved);
-    res.writeHead(200, {
-      "Content-Type": mimeTypes[ext] || "application/octet-stream",
-      "Cache-Control": "no-store"
-    });
-    res.end(data);
-  });
+  sendFile(res, resolved);
 });
 
 server.listen(port, () => {

@@ -16,7 +16,7 @@ const links = nodes.flatMap((node, index) =>
 );
 const circleGridSeed = Math.floor(Math.random() * 0x7fffffff);
 const fallbackBackdrop = `
-THE ONLY WAY OUT IS THROUGH
+THE ONLY WAY OUT IS THROUGH 
 `.trim();
 let backdropWords = fallbackBackdrop.split(/\s+/);
 let animationStarted = false;
@@ -555,6 +555,7 @@ if (document.fonts) {
     resetNodeBorderTargets();
   });
 }
+
 
 syncNodePositions();
 resetNodeBorderTargets();

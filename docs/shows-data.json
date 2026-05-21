@@ -2,52 +2,59 @@
   {
     "date": "2025-04-20",
     "location": "Chicago, IL - ",
-    "bands": ["Whole Team Dies", "Hoodwink", "Naomi 10 Million", "Deerest Friends"]
+    "bands": ["The Philadelphia Eagles", "Hoodwink", "Naomi 10 Million", "Deerest Friends"]
   },
    {
     "date": "2025-05-30",
     "location": "Chicago, IL - Atlantic",
-    "bands": ["Whole Team Dies", "Receiver", "Memory Card", "Copies"]
+    "bands": ["The Philadelphia Eagles", "Receiver", "Memory Card", "Copies"]
   },
    {
     "date": "2025-8-23",
     "location": "Chicago, IL - Fallen Log (SDS Benefit Show)",
-    "bands": ["Whole Team Dies", "Deerest Friends", "Oyeme", "Mizzy", "Sulkworm", "Tear Garden Collective"]
+    "bands": ["The Philadelphia Eagles", "Deerest Friends", "Oyeme", "Mizzy", "Sulkworm", "Tear Garden Collective"]
   },
    {
     "date": "2025-10-11",
     "location": "Bloomington Normal, IL - Lakehouse (Palastine Benefit Show",
-    "bands": ["Whole Team Dies", "Laikaa", "Gadfly", "Tapeworm", "A Doll For Abigail", "Blind Baby", "Unthynck"]
+    "bands": ["The Philadelphia Eagles", "Laikaa", "Gadfly", "Tapeworm", "A Doll For Abigail", "Blind Baby", "Unthynck"]
   },
    {
     "date": "2025-10-12",
     "location": "Chicago, IL - Empty Bliss",
-    "bands": ["Whole Team Dies", "Welcome to Berlin", "Lifeguard", "mail."]
+    "bands": ["The Philadelphia Eagles", "Welcome to Berlin", "Lifeguard", "mail."]
   },
    {
     "date": "2025-11-05",
     "location": "Chicago, IL - Fallen Log",
-    "bands": ["Whole Team Dies", "Poolish", "Soaps"]
+    "bands": ["The Philadelphia Eagles", "Poolish", "Soaps"]
   },
   {
     "date": "2026-02-22",
     "location": "Chicago, IL - Lowdown (Trash Tape Fest)",
-    "bands": ["Whole Team Dies", "Mail", "Current Union", "Sacred Heart Academy", "Chaepter", "Receiver", "Kitship"]
+    "bands": ["The Philadelphia Eagles", "Mail", "Current Union", "Sacred Heart Academy", "Chaepter", "Receiver", "Kitship"]
   },
   {
     "date": "2026-02-27",
     "location": "Chicago, IL - Sushi's Storefront",
-    "bands": ["Whole Team Dies", "A Doll For Abigail", "Mizzy", "Pleasure Dome"]
+    "bands": ["The Philadelphia Eagles", "A Doll For Abigail", "Mizzy", "Pleasure Dome"]
   },
   {
     "date": "2026-05-8",
     "location": "Chicago, IL - Lowdown",
-    "bands": ["Whole Team Dies", "Hither", "Cambodian Sim Card"]
+    "bands": ["The Philadelphia Eagles", "Hither", "Cambodian Sim Card"]
   },
   {
     "date": "2026-05-10",
     "location": "Chicago, IL - Cole's Bar",
-    "bands": ["Whole Team Dies", "T. Maguire", "Kweelag", "Model Cars"],
+    "bands": ["The Philadelphia Eagles", "T. Maguire", "Kweelag", "Model Cars"],
     "ticketUrl": "https://colesbarchicago.com/shows/model-cars-kweelag-t-maguire-philadelphia-eagles-may-10-2026-691180/"
+  },
+  {
+    "date": "2026-06-17",
+    "location": "Chicago, IL - Empty Bottle",
+    "bands": ["The Philadelphia Eagles", "Memory Card", "imy3", "Cambodian SIM card"],
+    "ticketUrl": "https://www.ticketweb.com/event/memory-card-the-philadelphia-empty-bottle-tickets/14930523"
   }
+
 ]

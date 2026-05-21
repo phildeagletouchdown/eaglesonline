@@ -12,11 +12,20 @@
     </style>
   </head>
   <body>
-    <main class="page-shell gallery-page">
+    <main
+      class="stage gallery-stage"
+      aria-label="Gallery"
+      data-backdrop="backdrop_dither.mp4"
+      data-backdrop-mobile="backdrop_dither.mp4"
+      data-node-layout="spreadsheet"
+    >
+      <pre class="ascii-layer" aria-hidden="true"></pre>
       <a class="back-link" href="index.html">index</a>
-      <h1>gallery</h1>
-      <section class="gallery-grid" data-gallery aria-label="Photo gallery"></section>
+      <section class="gallery-sheet" data-gallery aria-label="Photo gallery"></section>
     </main>
+    <script src="pretext.js"></script>
+    <script src="ascii-image.js"></script>
+    <script src="site.js"></script>
     <script src="gallery.js"></script>
   </body>
 </html>
