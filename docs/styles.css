@@ -3,7 +3,7 @@
   --paper: #050505;
   --ink: #f5f5f5;
   --muted: #a8a8a8;
-  --line: #d8d8d8;
+  --line: #000000;
   --focus: #ffffff;
   --bg-text-size: 22px;
   --ocr-font: "OCR A Std", "OCR A Extended", "OCR A", "OCR-A", monospace;
@@ -138,7 +138,7 @@ h1 {
   align-content: center;
   justify-items: center;
   padding: 24px;
-  background: url(11924.jpg);
+  background: url(CoworkerMoreDurian.jpg);
   background-size: cover;
 }
 
