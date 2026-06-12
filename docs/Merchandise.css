@@ -1,0 +1,93 @@
+@font-face {
+    font-family:"Stories";
+    src: url(bedtime\ stories.ttf);
+}
+
+@font-face{
+    font-family:"Scribble";
+    src: url(Scribble.ttf);
+}
+
+.card-row {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.image1{
+    position: relative;
+    width: 30%;
+    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
+}
+
+.wooden{
+    display: block;
+    width: 100%;
+}
+
+.wooden__overlay{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.wooden__overlay > * {
+    transform: translateY(20px);
+    transition: transform 0.25s;
+}
+
+.wooden__overlay:hover{
+    opacity: 1;
+}
+
+.wooden__overlay:hover > * {
+    transform: translateY(0px);
+}
+
+.wooden__overlay a {
+    color: #ffffff;
+    text-decoration: none;
+}
+.wooden__overlay a:hover {
+    text-decoration: underline;
+}
+
+.wood_title{
+    font-family: "Stories";
+    font-size: 4em;
+    font-weight: 20;
+    text-align: center;
+    width: 80%;
+}
+
+.wood_description{
+    font-family: "Scribble";
+    font-size: 1.5em;
+    margin-top: 1.25em;
+    font-weight: 10;
+    width: 80%;
+    text-align: center;
+}
+
+
+h1{
+    font-family:"Stories";
+    font-size: clamp(2rem, 7vw, 4rem);
+    margin: 50px 0 30px;
+    text-align: center;
+    color: aliceblue;
+    text-shadow: 2px 0 #000000, -2px 0 #000000, 0 2px #000000, 0 -2px #000000,
+               1px 1px #000000, -1px -1px #000000, 1px -1px #000000, -1px 1px #000000;
+
+    
+}

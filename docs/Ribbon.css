@@ -1,0 +1,55 @@
+@font-face {
+    font-family: 'Times New Roman', Times, serif;
+    src: url();
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+#bg {
+  display: flex;
+  position: fixed;
+  flex-wrap: wrap;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  z-index: -1;
+  top: 0;
+  left: 0;
+}
+
+#bg img {
+  width: calc(100vw / 10); /* adjust 10 to however many columns you want */
+  height: 100px;
+  object-fit: cover;
+}
+
+h1{
+    font-family:"Times New Roman";
+    font-size: clamp(2rem, 7vw, 4rem);
+    margin: 50px 0 30px;
+    text-align: center;
+    font-style: bold;
+    background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);  
+    background-clip: text;
+    color: transparent;
+}
+
+p{
+    font-weight: 40;
+  font-size: 1.5rem;
+  margin: 50px 50px 20px;
+  text-align: left;
+  font-style: italic;
+  background-image: linear-gradient(to left, violet, indigo, blue, green, yellow, orange, red);
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  }
