@@ -7,6 +7,7 @@ const backdropImage = new window.ImageAsciiSource("backdrop.png", {
   invert: true,
   charset: " .:-=+*#%@"
 });
+const fixedAsciiSize = 16;
 let backdropCandidates = [];
 let backdropCandidateIndex = 0;
 
@@ -19,13 +20,7 @@ const fallbackBackdrop = `
 THE ONLY WAY OUT IS THROUGH 
 `.trim();
 let backdropWords = fallbackBackdrop.split(/\s+/);
-let animationStarted = false;
-let mouse = {
-  x: window.innerWidth / 2,
-  y: window.innerHeight / 2,
-  active: false
-};
-let currentAsciiSize = window.innerWidth <= 700 ? 10 : 18;
+let animationFrameId = 0;
 let lastRenderedNodeSize = 0;
 let lastNodeLayoutMode = "";
 let circleGridSignature = "";
@@ -131,10 +126,6 @@ backdropImage.onchange = () => {
 };
 updateBackdropSource();
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
 function usesCircleGrid() {
   return stage.dataset.nodeLayout === "grid";
 }
@@ -177,36 +168,10 @@ function shuffled(list, random) {
   return output;
 }
 
-function distanceToBox(x, y, box) {
-  const dx = Math.max(box.left - x, 0, x - box.right);
-  const dy = Math.max(box.top - y, 0, y - box.bottom);
-  return Math.hypot(dx, dy);
-}
-
-function nearestNodeDistance() {
-  if (!mouse.active) return Number.POSITIVE_INFINITY;
-
-  return nodes.reduce((nearest, node) => {
-    const distance = distanceToBox(mouse.x, mouse.y, node.getBoundingClientRect());
-    return Math.min(nearest, distance);
-  }, Number.POSITIVE_INFINITY);
-}
-
 function updateAsciiSize() {
-  const compact = window.innerWidth <= 700;
-  const minSize = compact ? 4 : 6;
-  const maxSize = compact ? 10 : 18;
-  const influence = compact ? 300 : 560;
-  const distance = nearestNodeDistance();
-  const ratio = clamp(distance / influence, 0, 1);
-  const target = mouse.active ? minSize + ratio * (maxSize - minSize) : maxSize;
-  const quantized = Math.round(target);
-  currentAsciiSize += (quantized - currentAsciiSize) * 0.28;
-  const renderedSize = Math.round(currentAsciiSize);
-
-  asciiLayer.style.setProperty("--bg-text-size", `${renderedSize}px`);
-  stage.style.setProperty("--bg-text-size", `${renderedSize}px`);
-  syncNodeBoxes(renderedSize);
+  asciiLayer.style.setProperty("--bg-text-size", `${fixedAsciiSize}px`);
+  stage.style.setProperty("--bg-text-size", `${fixedAsciiSize}px`);
+  syncNodeBoxes(fixedAsciiSize);
 }
 
 function nodeLayoutMode() {
@@ -488,6 +453,19 @@ function nodeShape(node) {
   };
 }
 
+function asciiCutoutElements() {
+  if (!usesSpreadsheet()) return [];
+
+  return [
+    ...stage.querySelectorAll(
+      ".node-field, .gallery-table, .gallery-preview-title, .gallery-preview-caption"
+    )
+  ].filter((element) => {
+    const box = element.getBoundingClientRect();
+    return box.width > 0 && box.height > 0;
+  });
+}
+
 function renderAscii(time = 0) {
   const bounds = pretext.measure();
   const backgroundRows = backdropImage.getRows(bounds);
@@ -502,7 +480,7 @@ function renderAscii(time = 0) {
 
   pretext.render({
     stage,
-    exclusions: [],
+    exclusions: asciiCutoutElements(),
     words: backdropWords,
     wordOffset,
     connectors,
@@ -514,34 +492,46 @@ function renderAscii(time = 0) {
 function renderFrame(time) {
   updateAsciiSize();
   renderAscii(time);
-  requestAnimationFrame(renderFrame);
+  animationFrameId = requestAnimationFrame(renderFrame);
 }
 
 function startAnimation() {
-  if (animationStarted) return;
-  animationStarted = true;
-  requestAnimationFrame(renderFrame);
+  if (animationFrameId) return;
+  animationFrameId = requestAnimationFrame(renderFrame);
 }
 
-window.addEventListener("pointermove", (event) => {
-  mouse = {
-    x: event.clientX,
-    y: event.clientY,
-    active: true
-  };
-});
+function stopAnimation() {
+  if (!animationFrameId) return;
+  cancelAnimationFrame(animationFrameId);
+  animationFrameId = 0;
+}
 
-window.addEventListener("pointerleave", () => {
-  mouse.active = false;
-});
-
-window.addEventListener("blur", () => {
-  mouse.active = false;
-});
+function reloadAnimatedBackdrop() {
+  updateBackdropSource();
+  backdropImage.reload();
+  syncNodePositions();
+  resetNodeBorderTargets();
+  renderAscii(performance.now());
+  startAnimation();
+}
 
 window.addEventListener("resize", () => {
   syncNodePositions();
   resetNodeBorderTargets();
+});
+
+window.addEventListener("pagehide", () => {
+  stopAnimation();
+});
+
+window.addEventListener("pageshow", (event) => {
+  if (event.persisted || performance.getEntriesByType("navigation")[0]?.type === "back_forward") {
+    reloadAnimatedBackdrop();
+    return;
+  }
+
+  backdropImage.play();
+  startAnimation();
 });
 
 if (typeof mobileBackdropQuery.addEventListener === "function") {

@@ -57,7 +57,7 @@ h1 {
   z-index: 1;
   margin: 0;
   overflow: hidden;
-  color: var(--line);
+  color: #fff;
   font: var(--bg-text-size) / var(--bg-text-size) var(--ocr-font);
   white-space: pre;
   user-select: none;
@@ -163,8 +163,9 @@ h1 {
 .stage[data-node-layout="spreadsheet"] .node-field::after {
   display: block;
   box-sizing: border-box;
-  background: #000000AA;
-  color: var(--line);
+  padding-inline: 1ch;
+  background: white;
+  color: black;
   white-space: pre;
 }
 
@@ -185,8 +186,9 @@ h1 {
   height: auto;
   display: grid;
   grid-template-columns: 6ch minmax(0, 23ch);
-  color: var(--ink);
-  background: #000000AA;
+  padding-inline: 1ch;
+  color: black;
+  background: white;
   text-align: left;
   transform: none;
   transition: none;
@@ -208,11 +210,17 @@ h1 {
 }
 
 .stage[data-node-layout="spreadsheet"] .node-label {
-  position: static;
+  position: relative;
+  box-sizing: border-box;
+  left: auto;
+  top: auto;
   display: block;
+  width: 100%;
+  min-width: 0;
   color: inherit;
   font: inherit;
   overflow: hidden;
+  padding-right: 2ch;
   text-overflow: ellipsis;
   text-transform: uppercase;
   transform: none;
@@ -222,6 +230,9 @@ h1 {
 
 .stage[data-node-layout="spreadsheet"] .node-label::after {
   content: " |";
+  position: absolute;
+  right: 0;
+  top: 0;
 }
 
 @media (max-width: 700px) {
@@ -379,7 +390,7 @@ h1 {
 .gallery-table::after {
   display: block;
   background: #000;
-  color: var(--line);
+  color: white;
   white-space: pre;
 }
 
