@@ -5,7 +5,7 @@
   --muted: #a8a8a8;
   --line: #000000;
   --focus: #ffffff;
-  --bg-text-size: 22px;
+  --bg-text-size: 16px;
   --ocr-font: "OCR A Std", "OCR A Extended", "OCR A", "OCR-A", monospace;
 }
 
@@ -35,6 +35,8 @@ a {
   min-height: 100vh;
   overflow: hidden;
   padding: 9vh clamp(18px, 4vw, 56px);
+  background: #000;
+  isolation: isolate;
 }
 
 .kicker {
@@ -119,17 +121,11 @@ h1 {
   width: 72%;
   min-width: 0;
   color: var(--ink);
-  font: 16px / 1.05 var(--ocr-font);
+  font: var(--bg-text-size) / var(--bg-text-size) var(--ocr-font);
   overflow-wrap: anywhere;
   text-align: center;
   visibility: visible;
   white-space: normal;
-}
-
-@media (max-width: 700px) {
-  .stage[data-node-layout="grid"] .node-label {
-    font-size: 12px;
-  }
 }
 
 .stage[data-node-layout="spreadsheet"] {
@@ -138,8 +134,12 @@ h1 {
   align-content: center;
   justify-items: center;
   padding: 24px;
+<<<<<<< Updated upstream
   background: url(CoworkerMoreDurian.jpg);
   background-size: cover;
+=======
+  background: #000;
+>>>>>>> Stashed changes
 }
 
 .stage[data-node-layout="spreadsheet"] .node-field {
@@ -153,7 +153,7 @@ h1 {
   max-width: calc(100vw - 48px);
   padding: 0;
   color: var(--line);
-  font: 16px / 1.35 var(--ocr-font);
+  font: var(--bg-text-size) / var(--bg-text-size) var(--ocr-font);
   background: transparent;
   text-shadow: none;
   white-space: normal;
@@ -240,9 +240,6 @@ h1 {
     padding: 16px;
   }
 
-  .stage[data-node-layout="spreadsheet"] .node-field {
-    font-size: 12px;
-  }
 }
 
 .root {
@@ -370,7 +367,7 @@ h1 {
   justify-content: center;
   gap: 1.35em 3ch;
   color: var(--line);
-  font: 16px / 1.35 var(--ocr-font);
+  font: var(--bg-text-size) / var(--bg-text-size) var(--ocr-font);
 }
 
 .gallery-table {
@@ -395,7 +392,7 @@ h1 {
 }
 
 .gallery-table::before {
-  content: "+----+----------------------+----------+\A| ID | FILE                 | VIEW     |\A+----+----------------------+----------+";
+  content: "+----+----------------------+----------+\A| ID | DESC                 | VIEW     |\A+----+----------------------+----------+";
 }
 
 .gallery-table::after {
@@ -457,12 +454,12 @@ h1 {
 }
 
 .gallery-preview-title::before {
-  content: "FILE ";
+  content: "DESC ";
   color: var(--muted);
 }
 
 .gallery-preview-caption {
-  line-height: 1.35;
+  line-height: var(--bg-text-size);
 }
 
 .gallery-preview-frame {
@@ -512,7 +509,7 @@ h1 {
   margin: 0;
   overflow: hidden;
   color: var(--line);
-  font: 14px/14px var(--ocr-font);
+  font: var(--bg-text-size) / var(--bg-text-size) var(--ocr-font);
   white-space: pre;
   pointer-events: none;
   user-select: none;
@@ -521,10 +518,6 @@ h1 {
 @media (max-width: 700px) {
   .stage {
     padding-top: 7vh;
-  }
-
-  .ascii-layer {
-    --bg-text-size: 16px;
   }
 
   .node {
@@ -539,7 +532,6 @@ h1 {
     grid-template-columns: 1fr;
     justify-items: center;
     gap: 18px;
-    font-size: 12px;
   }
 
   .gallery-preview-frame {

@@ -16,9 +16,11 @@ const mimeTypes = {
   ".jpg": "image/jpeg",
   ".jpeg": "image/jpeg",
   ".png": "image/png",
+  ".webp": "image/webp",
   ".mp4": "video/mp4",
   ".ico": "image/x-icon"
 };
+const galleryImageExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
 
 function resolvePath(urlPath, baseDir = siteDir) {
   const cleanPath = decodeURIComponent(urlPath.split("?")[0]);
@@ -92,6 +94,99 @@ function sendJson(res, statusCode, payload) {
     "Cache-Control": "no-store"
   });
   res.end(JSON.stringify(payload, null, 2));
+}
+
+function readAsciiValue(buffer, tiffStart, fieldOffset, littleEndian) {
+  const read16 = littleEndian ? buffer.readUInt16LE.bind(buffer) : buffer.readUInt16BE.bind(buffer);
+  const read32 = littleEndian ? buffer.readUInt32LE.bind(buffer) : buffer.readUInt32BE.bind(buffer);
+  const type = read16(fieldOffset + 2);
+  const count = read32(fieldOffset + 4);
+  const inlineSize = 4;
+
+  if (type !== 2 || count <= 0) return "";
+
+  const valueOffset = count <= inlineSize
+    ? fieldOffset + 8
+    : tiffStart + read32(fieldOffset + 8);
+
+  if (valueOffset < 0 || valueOffset + count > buffer.length) return "";
+
+  return buffer
+    .subarray(valueOffset, valueOffset + count)
+    .toString("ascii")
+    .replace(/\0+$/, "")
+    .trim();
+}
+
+function readJpegIfd0Metadata(filePath) {
+  const buffer = fs.readFileSync(filePath);
+  let offset = 2;
+
+  if (buffer.length < 4 || buffer.readUInt16BE(0) !== 0xffd8) {
+    return {};
+  }
+
+  while (offset + 4 <= buffer.length) {
+    if (buffer[offset] !== 0xff) break;
+
+    const marker = buffer[offset + 1];
+    const length = buffer.readUInt16BE(offset + 2);
+    const segmentStart = offset + 4;
+    const segmentEnd = segmentStart + length - 2;
+
+    if (marker === 0xe1 && buffer.toString("ascii", segmentStart, segmentStart + 6) === "Exif\0\0") {
+      const tiffStart = segmentStart + 6;
+      const endian = buffer.toString("ascii", tiffStart, tiffStart + 2);
+      const littleEndian = endian === "II";
+      const read16 = littleEndian ? buffer.readUInt16LE.bind(buffer) : buffer.readUInt16BE.bind(buffer);
+      const read32 = littleEndian ? buffer.readUInt32LE.bind(buffer) : buffer.readUInt32BE.bind(buffer);
+      const ifd0Offset = tiffStart + read32(tiffStart + 4);
+      const fields = read16(ifd0Offset);
+      const metadata = {};
+
+      for (let index = 0; index < fields; index += 1) {
+        const fieldOffset = ifd0Offset + 2 + index * 12;
+        if (fieldOffset + 12 > segmentEnd) break;
+
+        const tag = read16(fieldOffset);
+        if (tag === 0x010e) metadata.description = readAsciiValue(buffer, tiffStart, fieldOffset, littleEndian);
+        if (tag === 0x8298) metadata.copyright = readAsciiValue(buffer, tiffStart, fieldOffset, littleEndian);
+      }
+
+      return metadata;
+    }
+
+    offset = segmentEnd;
+  }
+
+  return {};
+}
+
+function sendGalleryData(res) {
+  fs.readdir(dataDir, { withFileTypes: true }, (error, entries) => {
+    if (error) {
+      sendJson(res, 500, { error: "Could not read gallery directory." });
+      return;
+    }
+
+    const images = entries
+      .filter((entry) => entry.isFile() && galleryImageExtensions.has(path.extname(entry.name).toLowerCase()))
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .map((entry) => {
+        const filePath = path.join(dataDir, entry.name);
+        const metadata = readJpegIfd0Metadata(filePath);
+        const stem = path.basename(entry.name, path.extname(entry.name));
+
+        return {
+          path: `/data/${entry.name}`,
+          filename: entry.name,
+          description: metadata.description || stem,
+          copyright: metadata.copyright || ""
+        };
+      });
+
+    sendJson(res, 200, { images });
+  });
 }
 
 function formatBands(bands) {
@@ -171,6 +266,11 @@ const server = http.createServer((req, res) => {
         sendJson(res, 500, { error: "Shows database is not valid JSON." });
       }
     });
+    return;
+  }
+
+  if (cleanPath === "/api/gallery") {
+    sendGalleryData(res);
     return;
   }
 

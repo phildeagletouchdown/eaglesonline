@@ -2,7 +2,7 @@ class ImageAsciiSource {
   constructor(src, options = {}) {
     this.src = "";
     this.charset = options.charset || "wholetamdis";
-    this.invert = options.invert || false;
+    this.invert = options.invert || true;
     this.cache = new Map();
     this.failed = false;
     this.ready = false;
@@ -102,12 +102,41 @@ class ImageAsciiSource {
       this.attachVideo(this.media, token);
       this.media.src = src;
       this.media.load();
-      this.media.play().catch(() => {});
+      this.play();
       return;
     }
 
     this.attachImage(this.media, token);
     this.media.src = src;
+  }
+
+  reload() {
+    this.cache.clear();
+    this.lastAnimatedRows = null;
+    this.lastAnimatedSignature = "";
+
+    if (!this.media || this.mediaKind !== "video") return;
+
+    this.ready = false;
+    this.failed = false;
+
+    try {
+      this.media.pause();
+      this.media.currentTime = 0;
+    } catch {}
+
+    this.media.load();
+    this.play();
+  }
+
+  play() {
+    if (!this.media || this.mediaKind !== "video") return;
+
+    const playPromise = this.media.play();
+
+    if (playPromise && typeof playPromise.catch === "function") {
+      playPromise.catch(() => {});
+    }
   }
 
   currentSignature(bounds) {
