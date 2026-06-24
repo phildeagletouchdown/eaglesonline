@@ -1,0 +1,15 @@
+ body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: url('My\ Picks/JustPost.jpg');
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    background-color: black; /* fallback */
+    z-index: -1;
+    pointer-events: none; /* allows clicks to pass through */
+  }
