@@ -101,11 +101,10 @@
 }
 
 .wood_description{
-    font-family: "Times New Roman";
-    font-size: 1em;
+    font-family: "Scribble";
+    font-size: 1.5em;
     margin-top: 1.25em;
-    font-style: italic;
-    font-weight: 1;
+    font-weight: 10;
     width: 80%;
     text-align: center;
 }

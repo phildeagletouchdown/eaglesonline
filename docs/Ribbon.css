@@ -55,11 +55,3 @@ p{
   background-clip: text;
   -webkit-text-fill-color: transparent;
   }
-
-  .ribbon{
-    position: relative;
-    display: block;
-    margin: auto;
-    width: 40%;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.5);
-}
