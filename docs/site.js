@@ -7,7 +7,9 @@ const backdropImage = new window.ImageAsciiSource("backdrop.png", {
   invert: true,
   charset: " .:-=+*#%@"
 });
-const fixedAsciiSize = 16;
+const baseAsciiSize = 20;
+const minimumAsciiSize = 10;
+const spreadsheetTableColumns = 29;
 let backdropCandidates = [];
 let backdropCandidateIndex = 0;
 
@@ -168,10 +170,44 @@ function shuffled(list, random) {
   return output;
 }
 
+function spreadsheetTableRows() {
+  if (!usesSpreadsheet()) return 0;
+
+  const field = stage.querySelector(".node-field");
+  if (!field || !visibleBox(field)) return 0;
+
+  const visibleRows = [...field.querySelectorAll(".node")].filter(visibleBox).length;
+  return 3 + visibleRows + 1;
+}
+
+function fittedAsciiSize() {
+  if (!usesSpreadsheet()) return baseAsciiSize;
+
+  const tableRows = spreadsheetTableRows();
+  if (tableRows <= 0) return baseAsciiSize;
+
+  const styles = getComputedStyle(stage);
+  const availableWidth = Math.max(
+    0,
+    stage.clientWidth - parseFloat(styles.paddingLeft) - parseFloat(styles.paddingRight)
+  );
+  const availableHeight = Math.max(
+    0,
+    stage.clientHeight - parseFloat(styles.paddingTop) - parseFloat(styles.paddingBottom)
+  );
+  const baseCellWidth = measureBorderCell(baseAsciiSize, asciiLayer);
+  const widthScale = availableWidth / (spreadsheetTableColumns * baseCellWidth);
+  const heightScale = availableHeight / (tableRows * baseAsciiSize);
+  const scale = Math.min(1, widthScale, heightScale);
+
+  return Math.max(minimumAsciiSize, Math.floor(baseAsciiSize * scale * 100) / 100);
+}
+
 function updateAsciiSize() {
-  asciiLayer.style.setProperty("--bg-text-size", `${fixedAsciiSize}px`);
-  stage.style.setProperty("--bg-text-size", `${fixedAsciiSize}px`);
-  syncNodeBoxes(fixedAsciiSize);
+  const asciiSize = fittedAsciiSize();
+  asciiLayer.style.setProperty("--bg-text-size", `${asciiSize}px`);
+  stage.style.setProperty("--bg-text-size", `${asciiSize}px`);
+  syncNodeBoxes(asciiSize);
 }
 
 function nodeLayoutMode() {
@@ -453,17 +489,41 @@ function nodeShape(node) {
   };
 }
 
-function asciiCutoutElements() {
+function visibleBox(element) {
+  const box = element.getBoundingClientRect();
+  return box.width > 0 && box.height > 0;
+}
+
+function mainMenuCutout(bounds) {
+  const field = stage.querySelector(".node-field");
+  if (!field || !visibleBox(field)) return null;
+
+  const stageBox = stage.getBoundingClientRect();
+  const fieldBox = field.getBoundingClientRect();
+  const visibleRows = [...field.querySelectorAll(".node")].filter(visibleBox).length;
+  const tableWidth = spreadsheetTableColumns;
+  const tableRows = 3 + visibleRows + 1;
+  const tableInset = 1;
+  const left = Math.round((fieldBox.left - stageBox.left) / bounds.cellW) + tableInset;
+  const top = Math.round((fieldBox.top - stageBox.top) / bounds.cellH);
+
+  return {
+    type: "cell-box",
+    left,
+    right: left + tableWidth - 1,
+    top,
+    bottom: top + tableRows - 1
+  };
+}
+
+function asciiCutoutElements(bounds) {
   if (!usesSpreadsheet()) return [];
 
+  const menuCutout = mainMenuCutout(bounds);
   return [
-    ...stage.querySelectorAll(
-      ".node-field, .gallery-table, .gallery-preview-title, .gallery-preview-caption"
-    )
-  ].filter((element) => {
-    const box = element.getBoundingClientRect();
-    return box.width > 0 && box.height > 0;
-  });
+    ...(menuCutout ? [menuCutout] : []),
+    ...stage.querySelectorAll(".gallery-table, .gallery-preview-title, .gallery-preview-caption")
+  ].filter((element) => element.type === "cell-box" || visibleBox(element));
 }
 
 function renderAscii(time = 0) {
@@ -480,7 +540,7 @@ function renderAscii(time = 0) {
 
   pretext.render({
     stage,
-    exclusions: asciiCutoutElements(),
+    exclusions: asciiCutoutElements(bounds),
     words: backdropWords,
     wordOffset,
     connectors,

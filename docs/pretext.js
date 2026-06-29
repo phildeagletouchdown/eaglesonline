@@ -57,10 +57,32 @@ class PretextEngine {
     }
   }
 
+  reserveCellBox(grid, bounds, box) {
+    const left = Math.floor(box.left) - this.paddingCells;
+    const right = Math.ceil(box.right) + this.paddingCells;
+    const top = Math.floor(box.top);
+    const bottom = Math.ceil(box.bottom);
+
+    for (let y = top; y <= bottom; y += 1) {
+      if (y < 0 || y >= bounds.rows) continue;
+
+      for (let x = left; x <= right; x += 1) {
+        if (x < 0 || x >= bounds.cols) continue;
+        grid[y][x].blocked = true;
+        grid[y][x].char = " ";
+      }
+    }
+  }
+
   reserveElements(grid, bounds, stage, elements) {
     const stageBox = stage.getBoundingClientRect();
 
     elements.forEach((element) => {
+      if (element.type === "cell-box") {
+        this.reserveCellBox(grid, bounds, element);
+        return;
+      }
+
       const box = element.getBoundingClientRect();
       this.reserve(grid, bounds, {
         left: box.left - stageBox.left,
