@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "Signatie";
+  src: url("Signatie.otf") format("opentype");
+  font-display: swap;
+}
+
 #bg-video {
   position: fixed;
   top: 0;
@@ -14,7 +20,8 @@ label{
                1px 1px #000000, -1px -1px #000000, 1px -1px #000000, -1px 1px #000000;
 }
 
-h1{
+.contact-page h1{
+    font-family: "Signatie", "Times New Roman", serif;
     text-shadow: 2px 0 #000000, -2px 0 #000000, 0 2px #000000, 0 -2px #000000,
                1px 1px #000000, -1px -1px #000000, 1px -1px #000000, -1px 1px #000000;
 }

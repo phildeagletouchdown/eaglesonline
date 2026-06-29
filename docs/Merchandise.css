@@ -8,6 +8,14 @@
     src: url(Scribble.ttf);
 }
 
+a,
+a:visited,
+a:hover,
+a:active,
+a:focus {
+    color: #ffffff;
+}
+
  body::before {
     content: "";
     position: fixed;

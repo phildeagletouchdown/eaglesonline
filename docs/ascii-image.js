@@ -81,8 +81,8 @@ class ImageAsciiSource {
     media.addEventListener("error", markFailed);
   }
 
-  setSource(src) {
-    if (this.src === src) return;
+  setSource(src, options = {}) {
+    if (this.src === src && !options.force) return;
 
     this.loadToken += 1;
     this.src = src;
@@ -108,6 +108,19 @@ class ImageAsciiSource {
 
     this.attachImage(this.media, token);
     this.media.src = src;
+  }
+
+  play() {
+    if (this.mediaKind !== "video" || !this.media) return;
+
+    this.media.play().catch(() => {});
+  }
+
+  reload() {
+    const src = this.src;
+    if (!src) return;
+
+    this.setSource(src, { force: true });
   }
 
   currentSignature(bounds) {

@@ -33,7 +33,11 @@ body {
   letter-spacing: 0;
 }
 
-a {
+a,
+a:visited,
+a:hover,
+a:active,
+a:focus {
   color: inherit;
 }
 
@@ -205,6 +209,10 @@ h1 {
   transform: none;
   transition: none;
   will-change: auto;
+}
+
+.stage[data-node-layout="spreadsheet"] .node:visited {
+  color: white;
 }
 
 .stage[data-node-layout="spreadsheet"] .node:hover,

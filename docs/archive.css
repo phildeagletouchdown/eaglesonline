@@ -3,6 +3,14 @@
     src: url(Signatie.otf);
 }
 
+a,
+a:visited,
+a:hover,
+a:active,
+a:focus {
+    color: aliceblue;
+}
+
 
 h1{
     font-family: "Archive";
