@@ -7,16 +7,11 @@ if (downloadForm) {
 
     const email = downloadForm.querySelector('input[name="email"]');
     const replyTo = downloadForm.querySelector('input[name="_replyto"]');
-    const cc = downloadForm.querySelector('input[name="_cc"]');
     const submitButton = downloadForm.querySelector('button[type="submit"]');
     const nextPage = downloadForm.querySelector('input[name="_next"]');
 
     if (email && replyTo) {
       replyTo.value = email.value;
-    }
-
-    if (email && cc) {
-      cc.value = email.value;
     }
 
     if (downloadStatus) downloadStatus.textContent = "sending...";
