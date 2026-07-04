@@ -7,7 +7,8 @@
     merchandise: "merchandise.html",
     gallery: "gallery.html",
     ribbon: "HowToTieARibbon.html",
-    archive: "archive.html"
+    archive: "archive.html",
+    download: "download.html"
   };
   const scriptUrl = document.currentScript
     ? new URL(document.currentScript.getAttribute("src"), document.baseURI)

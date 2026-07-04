@@ -1,0 +1,244 @@
+.download-stage {
+  background: #000 url("MyPicks/FramePost.jpg") center / cover no-repeat;
+}
+
+.download-stage[data-backdrop-disabled="true"] .ascii-layer {
+  visibility: hidden;
+}
+
+.download-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(0, 0, 0, 0.48);
+  pointer-events: none;
+}
+
+.download-stage .ascii-layer,
+.download-stage .back-link,
+.download-stage .node-field {
+  z-index: 2;
+}
+
+.stage[data-node-layout="spreadsheet"] .download-menu {
+  --download-left-column: 31ch;
+  --download-right-column: 39ch;
+  width: max-content;
+  max-width: calc(100dvw - 48px);
+  text-transform: uppercase;
+  text-align: left;
+}
+
+.stage[data-node-layout="spreadsheet"] .download-menu::before {
+  content: "+------------------------------+--------------------------------------+\A| INFO                         | DOWNLOAD                             |\A+------------------------------+--------------------------------------+";
+}
+
+.stage[data-node-layout="spreadsheet"] .download-menu::after {
+  content: "+------------------------------+--------------------------------------+";
+}
+
+.stage[data-node-layout="spreadsheet"] .download-table-grid {
+  display: grid;
+  grid-template-columns: var(--download-left-column) var(--download-right-column);
+  width: max-content;
+  max-width: 100%;
+  padding-inline: 1.5ch;
+  color: white;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.download-copy,
+.download-controls {
+  min-width: 0;
+  min-height: calc(var(--bg-text-size) * 8);
+  padding: 0 2ch;
+  color: inherit;
+  background: transparent;
+  border-right: 1px solid currentColor;
+  font: inherit;
+  letter-spacing: 0;
+  line-height: inherit;
+  text-align: left;
+}
+
+.download-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 1lh;
+  border-left: 1px solid currentColor;
+  white-space: pre-line;
+}
+
+.download-copy span,
+.download-control-label,
+.download-prompt,
+.download-checkbox,
+.download-action-cell,
+.download-status-value {
+  min-width: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.download-controls {
+  display: grid;
+  align-content: start;
+  gap: 1lh;
+  white-space: normal;
+}
+
+.download-field {
+  display: grid;
+  grid-template-columns: 13ch minmax(0, 1fr);
+  gap: 1ch;
+  min-width: 0;
+  margin: 0;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+}
+
+.download-control-label {
+  text-transform: uppercase;
+  white-space: pre;
+}
+
+.download-prompt {
+  display: grid;
+  grid-template-columns: 2ch minmax(0, 1fr);
+  white-space: pre;
+}
+
+.download-prompt input {
+  min-width: 0;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.download-prompt input::placeholder {
+  color: rgba(245, 245, 245, 0.62);
+  text-transform: uppercase;
+}
+
+.download-prompt input:focus {
+  outline: 0;
+}
+
+.download-email-row:focus-within,
+.download-consent-row:hover,
+.download-consent-row:focus-within {
+  color: #000;
+  background: var(--ink);
+}
+
+.download-email-row:focus-within input,
+.download-email-row:focus-within input::placeholder {
+  color: #000;
+}
+
+.download-consent-row {
+  cursor: pointer;
+}
+
+.download-consent-row input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.download-checkbox::before {
+  content: "[ ] OK";
+}
+
+.download-consent-row input:checked + .download-checkbox::before {
+  content: "[X] OK";
+}
+
+.download-action-cell {
+  display: block;
+}
+
+.download-submit {
+  display: inline-block;
+  margin: 0;
+  padding: 0;
+  width: max-content;
+  color: #000;
+  background: var(--ink);
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.download-submit:hover,
+.download-submit:focus-visible {
+  color: var(--ink);
+  background: #000;
+  outline: 0;
+}
+
+.download-submit:disabled {
+  color: #444;
+  background: var(--muted);
+  cursor: default;
+}
+
+.download-status-value {
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+}
+
+@media (max-width: 700px) {
+  .stage[data-node-layout="spreadsheet"] .download-menu {
+    --download-left-column: 19ch;
+    --download-right-column: 28ch;
+    max-width: calc(100dvw - 32px);
+    font-size: 10px;
+    line-height: 10px;
+  }
+
+  .stage[data-node-layout="spreadsheet"] .download-menu::before {
+    content: "+------------------+---------------------------+\A| INFO             | DOWNLOAD                  |\A+------------------+---------------------------+";
+  }
+
+  .stage[data-node-layout="spreadsheet"] .download-menu::after {
+    content: "+------------------+---------------------------+";
+  }
+
+  .download-copy,
+  .download-controls {
+    min-height: calc(10px * 10);
+    padding: 0 1ch;
+  }
+
+  .download-copy {
+    gap: 1em;
+  }
+
+  .download-controls {
+    gap: 1em;
+  }
+
+  .download-field {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+}

@@ -95,6 +95,13 @@ class ImageAsciiSource {
     }
 
     const token = this.loadToken;
+    if (!src) {
+      this.mediaKind = "image";
+      this.media = null;
+      this.notifyChange();
+      return;
+    }
+
     this.mediaKind = this.isVideoSource(src) ? "video" : "image";
     this.media = this.mediaKind === "video" ? document.createElement("video") : new Image();
 

@@ -255,6 +255,51 @@ h1 {
   top: 0;
 }
 
+.stage[data-node-layout="spreadsheet"] .sheet-row {
+  position: relative;
+  box-sizing: border-box;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 6ch minmax(0, 23ch);
+  padding-inline: 1ch;
+  color: white;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  font: inherit;
+  letter-spacing: 0;
+  text-align: left;
+  text-decoration: none;
+  text-shadow: none;
+}
+
+.stage[data-node-layout="spreadsheet"] .sheet-row::before {
+  content: "| " attr(data-row) " |";
+  color: inherit;
+}
+
+.stage[data-node-layout="spreadsheet"] button.sheet-row,
+.stage[data-node-layout="spreadsheet"] a.sheet-row {
+  cursor: pointer;
+}
+
+.stage[data-node-layout="spreadsheet"] button.sheet-row:hover,
+.stage[data-node-layout="spreadsheet"] button.sheet-row:focus-visible,
+.stage[data-node-layout="spreadsheet"] a.sheet-row:hover,
+.stage[data-node-layout="spreadsheet"] a.sheet-row:focus-visible {
+  color: #000;
+  background: var(--ink);
+  outline: 0;
+  text-shadow: none;
+}
+
+.stage[data-node-layout="spreadsheet"] button.sheet-row:disabled {
+  color: var(--muted);
+  cursor: default;
+}
+
 @media (max-width: 700px) {
   .stage[data-node-layout="spreadsheet"] {
     padding: 16px;

@@ -3,13 +3,13 @@ const asciiLayer = document.querySelector(".ascii-layer");
 const stage = document.querySelector(".stage");
 const pretext = new window.PretextEngine(asciiLayer, { paddingCells: 0 });
 const mobileBackdropQuery = window.matchMedia("(max-width: 700px)");
-const backdropImage = new window.ImageAsciiSource("backdrop.png", {
+const backdropImage = new window.ImageAsciiSource(backdropDisabled() ? "" : "backdrop.png", {
   invert: true,
   charset: " .:-=+*#%@"
 });
 const baseAsciiSize = 20;
 const minimumAsciiSize = 10;
-const spreadsheetTableColumns = 29;
+const defaultSpreadsheetTableColumns = 29;
 let backdropCandidates = [];
 let backdropCandidateIndex = 0;
 
@@ -42,7 +42,13 @@ function uniqueSources(...sources) {
   return sources.filter((source, index, list) => source && list.indexOf(source) === index);
 }
 
+function backdropDisabled() {
+  return stage.dataset.backdropDisabled === "true" || stage.dataset.backdrop === "none";
+}
+
 function backdropSources() {
+  if (backdropDisabled()) return [];
+
   const desktopSource = stage.dataset.backdrop || "backdrop_cash.mp4";
   const mobileSource = stage.dataset.backdropMobile || desktopSource;
   const desktopFallback = stage.dataset.backdropFallback || "";
@@ -57,6 +63,13 @@ function backdropSources() {
 
 function updateBackdropSource() {
   const nextCandidates = backdropSources();
+  if (nextCandidates.length === 0) {
+    backdropCandidates = [];
+    backdropCandidateIndex = 0;
+    backdropImage.setSource("");
+    return;
+  }
+
   if (
     backdropCandidates.length === nextCandidates.length &&
     backdropCandidates.every((candidate, index) => candidate === nextCandidates[index])
@@ -176,8 +189,18 @@ function spreadsheetTableRows() {
   const field = stage.querySelector(".node-field");
   if (!field || !visibleBox(field)) return 0;
 
-  const visibleRows = [...field.querySelectorAll(".node")].filter(visibleBox).length;
+  const visibleRows = [...field.querySelectorAll(".node, .sheet-row")].filter(visibleBox).length;
   return 3 + visibleRows + 1;
+}
+
+function spreadsheetTableColumns() {
+  const columnsValue = mobileBackdropQuery.matches
+    ? stage.dataset.tableColumnsMobile || stage.dataset.tableColumns || ""
+    : stage.dataset.tableColumns || "";
+  const configuredColumns = Number.parseInt(columnsValue, 10);
+  return Number.isFinite(configuredColumns) && configuredColumns > 0
+    ? configuredColumns
+    : defaultSpreadsheetTableColumns;
 }
 
 function fittedAsciiSize() {
@@ -196,7 +219,7 @@ function fittedAsciiSize() {
     stage.clientHeight - parseFloat(styles.paddingTop) - parseFloat(styles.paddingBottom)
   );
   const baseCellWidth = measureBorderCell(baseAsciiSize, asciiLayer);
-  const widthScale = availableWidth / (spreadsheetTableColumns * baseCellWidth);
+  const widthScale = availableWidth / (spreadsheetTableColumns() * baseCellWidth);
   const heightScale = availableHeight / (tableRows * baseAsciiSize);
   const scale = Math.min(1, widthScale, heightScale);
 
@@ -500,8 +523,8 @@ function mainMenuCutout(bounds) {
 
   const stageBox = stage.getBoundingClientRect();
   const fieldBox = field.getBoundingClientRect();
-  const visibleRows = [...field.querySelectorAll(".node")].filter(visibleBox).length;
-  const tableWidth = spreadsheetTableColumns;
+  const visibleRows = [...field.querySelectorAll(".node, .sheet-row")].filter(visibleBox).length;
+  const tableWidth = spreadsheetTableColumns();
   const tableRows = 3 + visibleRows + 1;
   const tableInset = 1;
   const left = Math.round((fieldBox.left - stageBox.left) / bounds.cellW) + tableInset;
@@ -528,7 +551,7 @@ function asciiCutoutElements(bounds) {
 
 function renderAscii(time = 0) {
   const bounds = pretext.measure();
-  const backgroundRows = backdropImage.getRows(bounds);
+  const backgroundRows = backdropDisabled() ? null : backdropImage.getRows(bounds);
   const connectors = usesCircleGrid() || usesSpreadsheet()
     ? []
     : links.map(([from, to]) => [
@@ -541,7 +564,7 @@ function renderAscii(time = 0) {
   pretext.render({
     stage,
     exclusions: asciiCutoutElements(bounds),
-    words: backdropWords,
+    words: backdropDisabled() ? [] : backdropWords,
     wordOffset,
     connectors,
     nodes: renderedNodes,

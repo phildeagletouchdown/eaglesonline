@@ -9,7 +9,7 @@ if (contactForm && contactStatus) {
 
     try {
       const formData = new FormData(contactForm);
-      const response = await fetch("https://formsubmit.co/ajax/phildeagletouchdown@gmail.com", {
+      const response = await fetch("https://formsubmit.co/ajax/myhousewalkthrough@gmail.com", {
         method: "POST",
         body: formData,
         headers: {
