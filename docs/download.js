@@ -1,12 +1,13 @@
 const downloadForm = document.querySelector("[data-download-form]");
 const downloadStatus = document.querySelector("[data-download-status]");
 
-if (downloadForm && downloadStatus) {
+if (downloadForm) {
   downloadForm.addEventListener("submit", async (event) => {
     event.preventDefault();
 
     const email = downloadForm.querySelector('input[name="email"]');
     const replyTo = downloadForm.querySelector('input[name="_replyto"]');
+    const cc = downloadForm.querySelector('input[name="_cc"]');
     const submitButton = downloadForm.querySelector('button[type="submit"]');
     const nextPage = downloadForm.querySelector('input[name="_next"]');
 
@@ -14,7 +15,11 @@ if (downloadForm && downloadStatus) {
       replyTo.value = email.value;
     }
 
-    downloadStatus.textContent = "sending...";
+    if (email && cc) {
+      cc.value = email.value;
+    }
+
+    if (downloadStatus) downloadStatus.textContent = "sending...";
     if (submitButton) submitButton.disabled = true;
 
     try {
@@ -34,10 +39,10 @@ if (downloadForm && downloadStatus) {
         throw new Error(result.message || "Unable to send download link.");
       }
 
-      downloadStatus.textContent = "sent";
+      if (downloadStatus) downloadStatus.textContent = "sent";
       window.location.assign(nextPage?.value || "download-thanks.html");
     } catch (error) {
-      downloadStatus.textContent = error.message || "Unable to send download link.";
+      if (downloadStatus) downloadStatus.textContent = error.message || "Unable to send download link.";
       if (submitButton) submitButton.disabled = false;
     }
   });
