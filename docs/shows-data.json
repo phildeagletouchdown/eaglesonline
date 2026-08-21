@@ -61,7 +61,75 @@
     "date": "2026-07-15",
     "location": "Chicago, IL - art of gallery",
     "bands": ["My House Walkthrough", "Valeska Suratt", "A Doll For Abigail", "jose cuervo", "Corroded Eden"]
+  },
+  
+  {
+    "date": "2026-08-04",
+    "location": "Milwaukee, WI - MKE Ultra",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Frantic Repar", "A Rise And Fall of a Dilapidated Home"]
+  },
+    
+  {
+    "date": "2026-08-05",
+    "location": "Chicago, IL - Empty Bliss",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Infoplasm", "Instrument"]
+  },
+    
+  {
+    "date": "2026-08-07",
+    "location": "Detroit, MI - Reware Vintage",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "40ft to go", "Career Funeral"]
+  },
+    
+  {
+    "date": "2026-08-08",
+    "location": "Pittsburgh, PA",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "40ft to go", "Unrecovery", "Ruth E. Toothless"]
+  },
+    
+  {
+    "date": "2026-08-09",
+    "location": "New York, NY - Stereotype BK",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Rojava", "Backflips", "littlefurfamily"]
+  },
+    
+  {
+    "date": "2026-08-10",
+    "location": "Philladelphia, PA - Dead Birds",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Sodaseas", "Microgoblet"]
+  },
+    
+  {
+    "date": "2026-08-11",
+    "location": "Baltimore, MD - Undercroft",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Samskara", "Life"]
+  },
+    
+  {
+    "date": "2026-08-12",
+    "location": "Washington, DC - Rhizome",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Abriction", "Bile"]
+  },
+    
+  {
+    "date": "2026-08-13",
+    "location": "Carrboro, NC - The ArtsCenter",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Doshinthegiant", "-J"] 
+  },
+    
+  {
+    "date": "2026-08-04",
+    "location": "Louisville, KY - Rosetta Chapel",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Fish Gills", "Shiloh"]
+  },
+    
+  {
+    "date": "2026-08-29",
+    "location": "Chicago, IL - Burlington Bar",
+    "bands": ["My House Walkthrough", "Naomi 10 Million", "Sects", "Assembly"]
   }
+  
+
 
 
 ]
